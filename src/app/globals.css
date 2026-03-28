@@ -1,0 +1,12 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+.risk-red { border-left: 3px solid #dc2626; }
+.risk-yellow { border-left: 3px solid #d97706; }
+.risk-green { border-left: 3px solid #16a34a; }
