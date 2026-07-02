@@ -1,7 +1,9 @@
 import { createServerClient } from './supabase'
 import type { ContractReview, ContractClassification } from './analyzer'
 
-const supabase = createServerClient()
+function getSupabase() {
+  return createServerClient()
+}
 
 // Save a contract and its review to the database
 export async function saveReview(
@@ -13,7 +15,7 @@ export async function saveReview(
   userId?: string
 ) {
   // 1. Insert the contract record
-  const { data: contract, error: contractError } = await supabase
+  const { data: contract, error: contractError } = await getSupabase()
     .from('contracts')
     .insert({
       user_id: userId || null,
@@ -37,7 +39,7 @@ export async function saveReview(
   }
 
   // 2. Insert the review record
-  const { data: savedReview, error: reviewError } = await supabase
+  const { data: savedReview, error: reviewError } = await getSupabase()
     .from('reviews')
     .insert({
       contract_id: contract.id,
@@ -69,7 +71,7 @@ export async function saveReview(
 
 // Fetch a review by ID
 export async function getReview(reviewId: string) {
-  const { data, error } = await supabase
+  const { data, error } = await getSupabase()
     .from('reviews')
     .select(`
       *,
@@ -108,7 +110,7 @@ export async function getReview(reviewId: string) {
 
 // Fetch all reviews for a user
 export async function getUserReviews(userId: string) {
-  const { data, error } = await supabase
+  const { data, error } = await getSupabase()
     .from('reviews')
     .select(`
       id,
@@ -139,7 +141,7 @@ export async function saveChatMessage(
   content: string,
   userId?: string
 ) {
-  await supabase
+  await getSupabase()
     .from('chat_messages')
     .insert({
       review_id: reviewId,
@@ -151,7 +153,7 @@ export async function saveChatMessage(
 
 // Get chat messages for a review
 export async function getChatMessages(reviewId: string) {
-  const { data } = await supabase
+  const { data } = await getSupabase()
     .from('chat_messages')
     .select('role, content, created_at')
     .eq('review_id', reviewId)

@@ -1,9 +1,13 @@
 import Anthropic from '@anthropic-ai/sdk'
 import { playbooks, classificationPrompt } from './playbooks'
 
-const anthropic = new Anthropic({
-  apiKey: process.env.ANTHROPIC_API_KEY!,
-})
+function getAnthropic() {
+  const apiKey = process.env.ANTHROPIC_API_KEY
+  if (!apiKey) {
+    throw new Error('ANTHROPIC_API_KEY is required to analyze contracts')
+  }
+  return new Anthropic({ apiKey })
+}
 
 export interface ContractClassification {
   contract_type: string
@@ -45,7 +49,7 @@ export interface ContractReview {
 export async function classifyContract(text: string): Promise<ContractClassification> {
   const preview = text.slice(0, 3000)
   
-  const response = await anthropic.messages.create({
+  const response = await getAnthropic().messages.create({
     model: 'claude-sonnet-4-20250514',
     max_tokens: 500,
     messages: [{
@@ -72,7 +76,7 @@ export async function analyzeContract(
 ): Promise<ContractReview> {
   const playbook = playbooks[classification.contract_type] || playbooks.commercial_lease
   
-  const response = await anthropic.messages.create({
+  const response = await getAnthropic().messages.create({
     model: 'claude-sonnet-4-20250514',
     max_tokens: 4000,
     messages: [{
@@ -119,7 +123,7 @@ export async function chatAboutContract(
   reviewSummary: string,
   messages: { role: 'user' | 'assistant'; content: string }[]
 ): Promise<string> {
-  const response = await anthropic.messages.create({
+  const response = await getAnthropic().messages.create({
     model: 'claude-sonnet-4-20250514',
     max_tokens: 1000,
     system: `You are a friendly contract expert helping a small business owner understand their contract. You've already reviewed it and here's your analysis summary:

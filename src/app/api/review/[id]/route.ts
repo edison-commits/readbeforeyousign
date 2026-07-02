@@ -3,10 +3,11 @@ import { getReview } from '@/lib/db'
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const review = await getReview(params.id)
+    const { id } = await params
+    const review = await getReview(id)
     
     if (!review) {
       return NextResponse.json({ error: 'Review not found' }, { status: 404 })
