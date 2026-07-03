@@ -1,8 +1,14 @@
 import Stripe from 'stripe'
 
-export const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: '2024-12-18.acacia',
-})
+function getStripe() {
+  const apiKey = process.env.STRIPE_SECRET_KEY
+  if (!apiKey) {
+    throw new Error('STRIPE_SECRET_KEY is required for checkout')
+  }
+  return new Stripe(apiKey, {
+    apiVersion: '2026-03-25.dahlia',
+  })
+}
 
 export async function createCheckoutSession(
   fileId: string,
@@ -10,7 +16,7 @@ export async function createCheckoutSession(
   fileName?: string,
   userId?: string
 ): Promise<string> {
-  const session = await stripe.checkout.sessions.create({
+  const session = await getStripe().checkout.sessions.create({
     mode: 'payment',
     payment_method_types: ['card'],
     line_items: [
@@ -45,7 +51,7 @@ export async function verifyCheckoutSession(sessionId: string): Promise<{
   userId: string | null
 }> {
   try {
-    const session = await stripe.checkout.sessions.retrieve(sessionId)
+    const session = await getStripe().checkout.sessions.retrieve(sessionId)
     return {
       paid: session.payment_status === 'paid',
       fileId: (session.metadata?.file_id) || null,
